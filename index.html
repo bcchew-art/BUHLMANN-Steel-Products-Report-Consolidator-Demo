@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUHLMANN Report Consolidator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-light: #f7f7f8;
+    --surface: #ffffff;
+    --surface-2: #f2f2f4;
+    --surface-3: #eaeaed;
+    --border: #e0e0e4;
+    --border-light: #d0d0d6;
+    --text: #1a1a1a;
+    --text-dim: #5a5a66;
+    --text-muted: #8a8a96;
+    --red: #c8102e;
+    --red-dim: #a30d24;
+    --red-light: #fdf2f4;
+    --red-glow: rgba(200,16,46,0.08);
+    --green: #1a8a3e;
+    --green-light: #f0faf3;
+    --yellow: #b47a00;
+    --yellow-light: #fdf8ed;
+    --blue: #2563a8;
+    --blue-light: #f0f5fb;
+    --purple: #7c3aad;
+    --purple-light: #f8f2fd;
+    --radius: 6px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 0;
+  }
+
+  .logo-link:hover .logo-wordmark { color: var(--red); }
+
+  /* Recreated BUHLMANN logo: circle-B icon + wordmark */
+  .logo-icon-wrap {
+    width: 36px;
+    height: 36px;
+    position: relative;
+  }
+
+  .logo-wordmark {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 1.8px;
+    margin-left: 10px;
+    transition: color 0.15s;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .app-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sg-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .demo-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid rgba(200,16,46,0.15);
+  }
+
+  .demo-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* ─── Main ─── */
+  .main {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .hero-bar {
+    display: inline-block;
+    width: 36px;
+    height: 3px;
+    background: var(--red);
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    margin-bottom: 5px;
+    color: var(--text);
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* ─── Steps ─── */
+  .steps {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    justify-content: center;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .step.active {
+    color: var(--red);
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+
+  .step.done {
+    color: var(--green);
+    border-color: transparent;
+    background: var(--green-light);
+  }
+
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .step.active .step-num { background:var(--red); color:#fff; border-color:var(--red); }
+  .step.done .step-num { background:var(--green); color:#fff; border-color:var(--green); }
+
+  /* ─── Panels ─── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(4px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .panel-red-top { border-top: 2px solid var(--red); }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-dim);
+  }
+
+  .panel-title .ti {
+    width: 4px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 1px;
+  }
+
+  /* ─── Upload ─── */
+  .upload-zone {
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .upload-zone:hover {
+    border-color: var(--red);
+    background: var(--red-glow);
+  }
+
+  .upload-icon {
+    width: 36px; height: 36px;
+    margin: 0 auto 8px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-icon svg { width:18px; height:18px; }
+
+  .upload-zone .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .upload-zone .label small { color: var(--text-muted); }
+
+  /* ─── File List ─── */
+  .file-list { display:flex; flex-direction:column; gap:4px; margin-top:12px; }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-radius: 5px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+  }
+
+  .file-item .name { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text); }
+  .file-item .meta { color:var(--text-muted); font-size:10px; margin-left:10px; }
+
+  .file-item .remove {
+    background:none; border:none; color:var(--red); cursor:pointer;
+    font-size:13px; padding:2px 5px; border-radius:3px; line-height:1;
+  }
+  .file-item .remove:hover { background:var(--red-glow); }
+
+  .ft {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-size:9px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.4px; margin-left:8px;
+  }
+  .ft-stock { background:var(--blue-light); color:var(--blue); }
+  .ft-order { background:var(--yellow-light); color:var(--yellow); }
+  .ft-price { background:var(--green-light); color:var(--green); }
+
+  /* ─── Rules ─── */
+  .rules-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+  .rule-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 12px;
+    font-size: 10px;
+    border-left: 3px solid var(--border);
+    transition: border-color 0.15s, opacity 0.15s;
+    cursor: pointer;
+    display: block;
+  }
+  .rule-card:hover { border-left-color: var(--red); }
+  .rule-card.disabled { opacity: 0.45; }
+  .rule-card.disabled:hover { border-left-color: var(--border); }
+
+  .rule-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rule-check {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--red);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .rule-card .rule-name {
+    font-weight: 700; font-size: 11px; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .rule-card .rule-desc { color:var(--text-dim); line-height:1.5; }
+
+  .rtag {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .rtag-merge { background:var(--blue-light); color:var(--blue); }
+  .rtag-calc { background:var(--yellow-light); color:var(--yellow); }
+  .rtag-flag { background:var(--red-light); color:var(--red); }
+  .rtag-map { background:var(--green-light); color:var(--green); }
+
+  /* ─── Table ─── */
+  .table-wrap { overflow-x:auto; border-radius:5px; border:1px solid var(--border); }
+
+  table { width:100%; border-collapse:collapse; font-size:11px; }
+
+  th {
+    background: var(--surface-2);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background: var(--bg-light); }
+  .num { text-align:right; }
+
+  .badge {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-size:8px; font-weight:800; font-family:'Inter',sans-serif;
+    letter-spacing:0.3px;
+  }
+  .badge-pipe { background:var(--blue-light); color:var(--blue); }
+  .badge-fitting { background:var(--purple-light); color:var(--purple); }
+  .badge-flange { background:var(--yellow-light); color:var(--yellow); }
+  .badge-valve { background:var(--green-light); color:var(--green); }
+  .badge-ok { background:var(--green-light); color:var(--green); }
+  .badge-low { background:var(--red-light); color:var(--red); }
+  .badge-reorder { background:var(--yellow-light); color:var(--yellow); }
+
+  /* ─── Buttons ─── */
+  .btn {
+    padding:8px 16px; border-radius:5px; font-size:11px; font-weight:700;
+    border:none; cursor:pointer; transition:all 0.12s;
+    font-family:'Inter',sans-serif; letter-spacing:0.2px;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  }
+
+  .btn-primary { background:var(--red); color:#fff; }
+  .btn-primary:hover { background:var(--red-dim); }
+  .btn-secondary { background:var(--bg); color:var(--text-dim); border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--border-light); color:var(--text); }
+
+  .btn-row { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+
+  /* ─── Progress ─── */
+  .progress-bar { height:3px; background:var(--surface-2); border-radius:2px; overflow:hidden; margin:12px 0; }
+  .progress-fill { height:100%; background:var(--red); border-radius:2px; transition:width 0.5s ease; }
+
+  /* ─── Summary ─── */
+  .summary-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+
+  .summary-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .summary-card .val { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+  .summary-card .lbl {
+    font-size:9px; color:var(--text-muted); margin-top:3px;
+    text-transform:uppercase; letter-spacing:0.5px; font-weight:600;
+  }
+
+  .val-blue { color:var(--blue); }
+  .val-green { color:var(--green); }
+  .val-yellow { color:var(--yellow); }
+  .val-red { color:var(--red); }
+  .val-purple { color:var(--purple); }
+
+  .hidden { display:none; }
+
+  .download-bar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; background:var(--red-light); border:1px solid rgba(200,16,46,0.15);
+    border-radius:5px; margin-top:12px;
+  }
+  .download-bar span { font-size:11px; font-weight:600; color:var(--text); }
+
+  /* ─── Tabs ─── */
+  .tabs { display:flex; gap:0; margin-bottom:12px; border-bottom:1px solid var(--border); }
+
+  .tab {
+    padding:8px 14px; font-size:11px; font-weight:600;
+    color:var(--text-muted); cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all 0.12s; margin-bottom:-1px;
+  }
+  .tab.active { color:var(--red); border-bottom-color:var(--red); }
+  .tab:hover { color:var(--text-dim); }
+
+  /* ─── Footer ─── */
+  .footer-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--red-dim) 30%, transparent 100%);
+    margin-top: 40px;
+  }
+
+  @media (max-width:768px) {
+    .rules-grid { grid-template-columns:1fr; }
+    .summary-row { grid-template-columns:repeat(2,1fr); }
+    .steps { flex-wrap:wrap; }
+    .header { padding:0 16px; }
+    .main { padding:20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <a href="#" onclick="goStep(1);return false;" class="logo-link" title="Home">
+      <svg class="logo-icon-wrap" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="16" fill="none" stroke="#c8102e" stroke-width="2.2"/>
+        <text x="18" y="23" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="17" fill="#c8102e">B</text>
+      </svg>
+      <span class="logo-wordmark">BUHLMANN</span>
+    </a>
+    <div class="header-divider"></div>
+    <span class="app-name">Report Consolidator</span>
+  </div>
+  <div class="header-right">
+    <span class="sg-label">Singapore Pte. Ltd.</span>
+    <div class="demo-badge"><span class="demo-dot"></span> DEMO</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="hero">
+    <div class="hero-bar"></div>
+    <h1>Steel Products Report Consolidator</h1>
+    <p>Merge stock levels, purchase orders and pricing across pipes, fittings, flanges and valves</p>
+  </div>
+
+  <div class="steps">
+    <div class="step active" id="step1"><span class="step-num">1</span> Upload</div>
+    <div class="step" id="step2"><span class="step-num">2</span> Rules</div>
+    <div class="step" id="step3"><span class="step-num">3</span> Output</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="panel-upload">
+    <div class="panel panel-red-top">
+      <div class="panel-title"><span class="ti"></span> Source Files</div>
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8a8a96" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="label">Drop report files here or click to browse<br><small>.xlsx, .csv — Stock Reports, PO Trackers, Price Lists</small></div>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <div class="btn-row hidden" id="uploadSubmitRow">
+        <button class="btn btn-primary" id="btnUploadNext">Next: Configure Rules</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="ti"></span> Quick Demo</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Load 3 sample reports: Tuas Warehouse Stock, Purchase Orders (Q1 2026), Supplier Price List</p>
+      <button class="btn btn-primary" id="btnLoadSample">Load Sample Data</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="panel-rules" class="hidden">
+    <div class="panel panel-red-top">
+      <div class="panel-title"><span class="ti"></span> Consolidation Rules</div>
+      <div class="rules-grid">
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="join" checked> <div class="rule-name"><span class="rtag rtag-merge">Merge</span> Join by Part No.</div></div>
+          <div class="rule-desc">Match rows across Stock, Orders and Price files using BUHLMANN Part Number as primary key.</div>
+        </label>
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="available" checked> <div class="rule-name"><span class="rtag rtag-calc">Calc</span> Available Qty</div></div>
+          <div class="rule-desc">Available = On Hand - Allocated. Flag negatives as backorder status.</div>
+        </label>
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="value" checked> <div class="rule-name"><span class="rtag rtag-calc">Calc</span> Inventory Value</div></div>
+          <div class="rule-desc">Value = On Hand x Unit Cost (SGD). Roll up by product category and material grade.</div>
+        </label>
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="reorder" checked> <div class="rule-name"><span class="rtag rtag-flag">Flag</span> Reorder Alert</div></div>
+          <div class="rule-desc">Flag items where Available Qty falls below the MOQ threshold per product line.</div>
+        </label>
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="grade" checked> <div class="rule-name"><span class="rtag rtag-map">Map</span> Grade and Standard</div></div>
+          <div class="rule-desc">Preserve material grade (ASTM/DIN/EN/API) and product standard from stock file for traceability.</div>
+        </label>
+        <label class="rule-card">
+          <div class="rule-header"><input type="checkbox" class="rule-check" data-rule="pricesync" checked> <div class="rule-name"><span class="rtag rtag-merge">Merge</span> Price Sync</div></div>
+          <div class="rule-desc">Pull latest unit cost from supplier price list. Flag variance greater than 5% vs last purchase.</div>
+        </label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btnRulesBack">Back</button>
+        <button class="btn btn-primary" id="btnRunConsolidate">Run Consolidation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="panel-output" class="hidden">
+    <div class="panel panel-red-top">
+      <div class="panel-title"><span class="ti"></span> Consolidated Report</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div id="outputContent" class="hidden">
+        <div class="summary-row">
+          <div class="summary-card"><div class="val val-blue" id="totalSKUs">0</div><div class="lbl">Total SKUs</div></div>
+          <div class="summary-card"><div class="val val-green" id="totalValue">$0</div><div class="lbl">Inventory (SGD)</div></div>
+          <div class="summary-card"><div class="val val-purple" id="totalWeight">0</div><div class="lbl">Total Tonnes</div></div>
+          <div class="summary-card"><div class="val val-yellow" id="onOrder">0</div><div class="lbl">On Order</div></div>
+          <div class="summary-card"><div class="val val-red" id="alerts">0</div><div class="lbl">Alerts</div></div>
+        </div>
+
+        <div class="tabs" id="tabBar">
+          <div class="tab active" data-tab="all">All Items</div>
+          <div class="tab" data-tab="pipes">Pipes and Tubes</div>
+          <div class="tab" data-tab="fittings">Fittings</div>
+          <div class="tab" data-tab="flanges">Flanges</div>
+          <div class="tab" data-tab="valves">Valves</div>
+          <div class="tab" data-tab="alerts">Alerts</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Part No.</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Grade</th>
+                <th>Std</th>
+                <th class="num">On Hand</th>
+                <th class="num">Alloc</th>
+                <th class="num">On Order</th>
+                <th class="num">Avail</th>
+                <th class="num">Cost (SGD)</th>
+                <th class="num">Value (SGD)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="outputBody"></tbody>
+          </table>
+        </div>
+
+        <div class="download-bar">
+          <span>Consolidated report ready — 3 source files merged, 17 SKUs processed</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary" id="btnExportCsv">Export .csv</button>
+            <button class="btn btn-primary" id="btnExportXlsx">Export .xlsx</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btnOutputBack">Back to Rules</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bar"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+// Mobile tap helper — some WebViews have 300ms delay or swallow clicks
+function addTap(id, fn){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.addEventListener('click',fn);
+  el.addEventListener('touchend',function(e){e.preventDefault();fn();});
+}
+
+var stockData = [
+  {part:"BH-P-CS-001",desc:"Seamless Pipe 6in Sch40",cat:"Pipes",grade:"A106 Gr.B",std:"ASTM",onHand:120,weight:28.5,cost:285.00,moq:20},
+  {part:"BH-P-CS-002",desc:"Seamless Pipe 8in Sch80",cat:"Pipes",grade:"A106 Gr.B",std:"ASTM",onHand:45,weight:42.0,cost:520.00,moq:10},
+  {part:"BH-P-SS-003",desc:"SS Pipe 4in Sch10S",cat:"Pipes",grade:"TP316L",std:"A312",onHand:85,weight:8.2,cost:410.00,moq:15},
+  {part:"BH-P-SS-004",desc:"SS Pipe 2in Sch40S",cat:"Pipes",grade:"TP304L",std:"A312",onHand:200,weight:6.8,cost:185.00,moq:30},
+  {part:"BH-P-AL-005",desc:"Alloy Pipe 6in Sch40",cat:"Pipes",grade:"A335 P11",std:"ASTM",onHand:18,weight:15.3,cost:1250.00,moq:5},
+  {part:"BH-P-DX-006",desc:"Duplex Pipe 3in Sch40",cat:"Pipes",grade:"S31803",std:"A790",onHand:30,weight:5.1,cost:890.00,moq:8},
+  {part:"BH-F-CS-010",desc:"90 Deg Elbow LR 6in Sch40",cat:"Fittings",grade:"A234 WPB",std:"B16.9",onHand:250,weight:1.8,cost:45.00,moq:50},
+  {part:"BH-F-CS-011",desc:"Tee Equal 4in Sch40",cat:"Fittings",grade:"A234 WPB",std:"B16.9",onHand:80,weight:2.1,cost:72.00,moq:20},
+  {part:"BH-F-SS-012",desc:"Reducer Con 6in x 4in Sch10S",cat:"Fittings",grade:"TP316L",std:"B16.9",onHand:35,weight:0.9,cost:165.00,moq:10},
+  {part:"BH-F-SS-013",desc:"45 Deg Elbow 2in Sch40S",cat:"Fittings",grade:"TP304L",std:"B16.9",onHand:400,weight:0.3,cost:28.00,moq:100},
+  {part:"BH-FL-CS-020",desc:"WN Flange 6in 150# RF",cat:"Flanges",grade:"A105",std:"B16.5",onHand:60,weight:7.5,cost:95.00,moq:10},
+  {part:"BH-FL-CS-021",desc:"SO Flange 8in 300# RF",cat:"Flanges",grade:"A105",std:"B16.5",onHand:25,weight:14.2,cost:180.00,moq:5},
+  {part:"BH-FL-SS-022",desc:"WN Flange 4in 150# RF",cat:"Flanges",grade:"F316L",std:"B16.5",onHand:90,weight:3.8,cost:210.00,moq:15},
+  {part:"BH-FL-DX-023",desc:"WN Flange 3in 600# RTJ",cat:"Flanges",grade:"S31803",std:"B16.5",onHand:12,weight:6.2,cost:650.00,moq:4},
+  {part:"BH-V-GT-030",desc:"Gate Valve 6in 150# RF",cat:"Valves",grade:"A216 WCB",std:"API 600",onHand:8,weight:45.0,cost:2800.00,moq:2},
+  {part:"BH-V-BL-031",desc:"Ball Valve 2in 800# SW",cat:"Valves",grade:"A105",std:"API 608",onHand:40,weight:3.5,cost:320.00,moq:10},
+  {part:"BH-V-CK-032",desc:"Check Valve 4in 150# RF",cat:"Valves",grade:"A216 WCB",std:"API 6D",onHand:15,weight:18.0,cost:1450.00,moq:3},
+];
+
+var orderData = [
+  {part:"BH-P-CS-001",allocated:80,onOrder:50},
+  {part:"BH-P-CS-002",allocated:35,onOrder:20},
+  {part:"BH-P-SS-003",allocated:60,onOrder:40},
+  {part:"BH-P-SS-004",allocated:50,onOrder:0},
+  {part:"BH-P-AL-005",allocated:15,onOrder:10},
+  {part:"BH-P-DX-006",allocated:22,onOrder:15},
+  {part:"BH-F-CS-010",allocated:120,onOrder:200},
+  {part:"BH-F-CS-011",allocated:60,onOrder:50},
+  {part:"BH-F-SS-012",allocated:30,onOrder:20},
+  {part:"BH-F-SS-013",allocated:150,onOrder:0},
+  {part:"BH-FL-CS-020",allocated:40,onOrder:30},
+  {part:"BH-FL-CS-021",allocated:20,onOrder:15},
+  {part:"BH-FL-SS-022",allocated:30,onOrder:0},
+  {part:"BH-FL-DX-023",allocated:10,onOrder:8},
+  {part:"BH-V-GT-030",allocated:6,onOrder:4},
+  {part:"BH-V-BL-031",allocated:25,onOrder:20},
+  {part:"BH-V-CK-032",allocated:12,onOrder:5},
+];
+
+let files=[],consolidatedData=[],currentStep=1;
+
+function goStep(n){
+  currentStep=n;
+  document.getElementById('panel-upload').classList.toggle('hidden',n!==1);
+  document.getElementById('panel-rules').classList.toggle('hidden',n!==2);
+  document.getElementById('panel-output').classList.toggle('hidden',n!==3);
+  document.querySelectorAll('.step').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    if(i+1<n)el.classList.add('done');
+    if(i+1===n)el.classList.add('active');
+  });
+}
+
+function loadSampleData(){
+  files=[
+    {name:"tuas_warehouse_stock_mar2026.xlsx",size:"18.4 KB",rows:17,type:"Stock"},
+    {name:"purchase_orders_q1_2026.xlsx",size:"12.1 KB",rows:17,type:"Orders"},
+    {name:"supplier_pricelist_2026.csv",size:"8.6 KB",rows:45,type:"Prices"}
+  ];
+  renderFiles();
+  document.getElementById('uploadSubmitRow').classList.remove('hidden');
+}
+
+function renderFiles(){
+  var list=document.getElementById('fileList');
+  var cls={Stock:'ft-stock',Orders:'ft-order',Prices:'ft-price'};
+  var html='';
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    html+='<div class="file-item"><div>'+
+      '<span class="name">'+f.name+'</span>'+
+      '<span class="meta">'+f.size+' / '+f.rows+' rows</span>'+
+      '<span class="ft '+cls[f.type]+'">'+f.type+'</span>'+
+      '</div><button class="remove" data-idx="'+i+'">x</button></div>';
+  }
+  list.innerHTML=html;
+  var btns=list.querySelectorAll('.remove');
+  for(var j=0;j<btns.length;j++){
+    btns[j].addEventListener('click',function(){removeFile(parseInt(this.getAttribute('data-idx')));});
+  }
+}
+
+function removeFile(i){files.splice(i,1);renderFiles();}
+
+function runConsolidation(){
+  goStep(3);
+  var bar=document.getElementById('progressFill');
+  var content=document.getElementById('outputContent');
+  content.classList.add('hidden');
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*22+8;
+    if(p>=100){p=100;clearInterval(iv);setTimeout(function(){content.classList.remove('hidden');renderOutput();},200);}
+    bar.style.width=p+'%';
+  },160);
+}
+
+function renderOutput(){
+  consolidatedData=stockData.map(function(s){
+    var o=orderData.find(function(x){return x.part===s.part;})||{allocated:0,onOrder:0};
+    var available=s.onHand-o.allocated;
+    var needsReorder=available<s.moq;
+    var value=s.onHand*s.cost;
+    var totalWeight=s.onHand*s.weight/1000;
+    return Object.assign({},s,{allocated:o.allocated,onOrder:o.onOrder,available:available,needsReorder:needsReorder,value:value,totalWeight:totalWeight});
+  });
+  // Reset tabs to All Items
+  var tabs=document.querySelectorAll('.tab');
+  for(var t=0;t<tabs.length;t++){tabs[t].classList.remove('active');}
+  document.querySelector('.tab[data-tab="all"]').classList.add('active');
+  renderTable(consolidatedData);
+  document.getElementById('totalSKUs').textContent=consolidatedData.length;
+  document.getElementById('totalValue').textContent='$'+consolidatedData.reduce(function(a,r){return a+r.value;},0).toLocaleString(undefined,{maximumFractionDigits:0});
+  document.getElementById('totalWeight').textContent=consolidatedData.reduce(function(a,r){return a+r.totalWeight;},0).toFixed(1);
+  document.getElementById('onOrder').textContent=consolidatedData.reduce(function(a,r){return a+r.onOrder;},0);
+  document.getElementById('alerts').textContent=consolidatedData.filter(function(r){return r.needsReorder;}).length;
+}
+
+function renderTable(data){
+  var tbody=document.getElementById('outputBody');
+  var catMap={Pipes:'badge-pipe',Fittings:'badge-fitting',Flanges:'badge-flange',Valves:'badge-valve'};
+  var html='';
+  for(var i=0;i<data.length;i++){
+    var r=data[i];
+    var availColor=r.available<r.moq?'var(--red)':r.available<r.moq*2?'var(--yellow)':'var(--green)';
+    var statusBadge=r.needsReorder?(r.available<=0?'<span class="badge badge-low">BACKORDER</span>':'<span class="badge badge-reorder">REORDER</span>'):'<span class="badge badge-ok">OK</span>';
+    html+='<tr>'+
+      '<td>'+r.part+'</td>'+
+      '<td>'+r.desc+'</td>'+
+      '<td><span class="badge '+catMap[r.cat]+'">'+r.cat+'</span></td>'+
+      '<td>'+r.grade+'</td>'+
+      '<td style="font-size:9px;color:var(--text-muted)">'+r.std+'</td>'+
+      '<td class="num">'+r.onHand+'</td>'+
+      '<td class="num">'+r.allocated+'</td>'+
+      '<td class="num">'+r.onOrder+'</td>'+
+      '<td class="num" style="color:'+availColor+';font-weight:700">'+r.available+'</td>'+
+      '<td class="num">$'+r.cost.toLocaleString(undefined,{minimumFractionDigits:2})+'</td>'+
+      '<td class="num">$'+r.value.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'+
+      '<td>'+statusBadge+'</td>'+
+      '</tr>';
+  }
+  tbody.innerHTML=html;
+}
+
+function switchTab(tab,el){
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('active');}
+  el.classList.add('active');
+  var f=consolidatedData;
+  if(tab==='pipes')f=consolidatedData.filter(function(r){return r.cat==='Pipes';});
+  else if(tab==='fittings')f=consolidatedData.filter(function(r){return r.cat==='Fittings';});
+  else if(tab==='flanges')f=consolidatedData.filter(function(r){return r.cat==='Flanges';});
+  else if(tab==='valves')f=consolidatedData.filter(function(r){return r.cat==='Valves';});
+  else if(tab==='alerts')f=consolidatedData.filter(function(r){return r.needsReorder;});
+  renderTable(f);
+}
+
+function downloadCSV(){
+  var h=['Part No','Description','Category','Grade','Standard','On Hand','Allocated','On Order','Available','Unit Cost (SGD)','Value (SGD)','Status'];
+  var rows=consolidatedData.map(function(r){
+    return [r.part,r.desc,r.cat,r.grade,r.std,r.onHand,r.allocated,r.onOrder,r.available,r.cost.toFixed(2),r.value.toFixed(2),r.needsReorder?(r.available<=0?'BACKORDER':'REORDER'):'OK'];
+  });
+  var lines=[h.join(',')];
+  for(var i=0;i<rows.length;i++){
+    lines.push(rows[i].map(function(c){return '"'+c+'"';}).join(','));
+  }
+  var csv=lines.join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='buhlmann_consolidated_report.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Event listeners (mobile-safe with touch support)
+addTap('btnLoadSample',function(){loadSampleData();});
+addTap('btnUploadNext',function(){if(files.length>0)goStep(2);});
+addTap('btnRulesBack',function(){goStep(1);});
+addTap('btnRunConsolidate',function(){runConsolidation();});
+addTap('btnExportCsv',function(){downloadCSV();});
+addTap('btnExportXlsx',function(){downloadCSV();});
+addTap('btnOutputBack',function(){goStep(2);});
+
+// Rule checkbox toggle — dim card when unchecked
+var ruleChecks=document.querySelectorAll('.rule-check');
+for(var rc=0;rc<ruleChecks.length;rc++){
+  ruleChecks[rc].addEventListener('change',function(){
+    var card=this.closest('.rule-card');
+    if(this.checked){card.classList.remove('disabled');}
+    else{card.classList.add('disabled');}
+  });
+}
+
+var tabBar=document.getElementById('tabBar');
+tabBar.addEventListener('click',function(e){
+  var t=e.target;
+  if(t.classList.contains('tab')){
+    switchTab(t.getAttribute('data-tab'),t);
+  }
+});
+
+var zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',function(e){e.preventDefault();zone.style.borderColor='var(--red)';zone.style.background='var(--red-glow)';});
+zone.addEventListener('dragleave',function(){zone.style.borderColor='var(--border-light)';zone.style.background='transparent';});
+zone.addEventListener('drop',function(e){e.preventDefault();zone.style.borderColor='var(--border-light)';zone.style.background='transparent';});
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
